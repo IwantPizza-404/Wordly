@@ -1,0 +1,34 @@
+:root {
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F7F7F7;
+  --bg-tertiary: #222222;
+
+  --text-color: #0A0A0A;
+  --text-color-light: #6B6B6B;
+  --primary-color: #4865FF;
+  --secondary-color: #E9EEEA;
+  --border-color: #D8DAD9;
+  --font-family: 'Space Grotesk', sans-serif;
+
+  --skeleton-bg: #E0E0E0;
+  --skeleton-bg-start: #E0E0E0;
+  --skeleton-bg-end: #F0F0F0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  font-weight: normal;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--text-color);
+  background: var(--bg-primary);
+  font-family: var(--font-family);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

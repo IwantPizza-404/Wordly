@@ -1,0 +1,214 @@
+<template>
+  <div class="login-page">
+    <div class="login-container">
+      <div class="login-header">
+        <h1>Create Account</h1>
+        <p class="subtitle">Please fill in your details to register</p>
+      </div>
+      <form @submit.prevent="handleRegister" class="login-form">
+        <FormInput
+          id="fullName"
+          label="Full Name"
+          type="text"
+          v-model="fullName"
+          placeholder="Enter your full name"
+          required
+        />
+        <FormInput
+          id="username"
+          label="Username"
+          type="text"
+          v-model="username"
+          placeholder="Enter your username"
+          required
+        />
+        <FormInput
+          id="email"
+          label="Email"
+          type="email"
+          v-model="email"
+          placeholder="Enter your email"
+          required
+        />
+        <FormInput
+          id="password"
+          label="Password"
+          type="password"
+          v-model="password"
+          placeholder="Enter your password"
+          required
+        />
+        <button type="submit" class="btn-primary" :disabled="isLoading">
+          <span v-if="isLoading" class="loading-text">
+            <span class="loading-spinner"></span>
+            <!-- Registering... -->
+          </span>
+          <span v-else>Create Account</span>
+        </button>
+      </form>
+      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { registerUser } from '@/services/authService';
+import { useAuthStore } from '@/store/authStore';
+import FormInput from '@/components/common/FormInput.vue';
+
+const fullName = ref('');
+const username = ref('');
+const email = ref('');
+const password = ref('');
+const errorMessage = ref('');
+const isLoading = ref(false);
+const router = useRouter();
+const authStore = useAuthStore();
+
+const handleRegister = async () => {
+  isLoading.value = true;
+  errorMessage.value = '';
+
+  try {
+    const response = await registerUser({
+      full_name: fullName.value,
+      username: username.value,
+      email: email.value,
+      password: password.value,
+    });
+
+    if (response) {
+      await authStore.login(username.value, password.value);
+      router.push('/');
+    }
+  } catch (error) {
+    errorMessage.value = 'Registration failed. Please try again.';
+    console.error('Registration error:', error);
+  } finally {
+    isLoading.value = false;
+  }
+};
+</script>
+
+<style scoped>
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 24px;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 420px;
+  background: white;
+  padding: 40px;
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-header h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #64748b;
+  margin: 0;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.btn-primary {
+  width: 100%;
+  height: 48px;
+  padding: 14px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.loading-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.error {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background-color: #fee2e2;
+  color: #ef4444;
+  border-radius: 12px;
+  font-size: 14px;
+  text-align: center;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 32px 24px;
+  }
+
+  .login-header h1 {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+}
+</style>
