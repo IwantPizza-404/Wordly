@@ -9,7 +9,7 @@
           </div>
           <h2 class="section-title">Popular sets</h2>
         </div>
-        <div v-if="loadingPopular && !popularDecks.length">
+        <div v-if="deckStore.loading && !deckStore.decks.length">
           <swiper
             :modules="[SwiperPagination, SwiperNavigation, SwiperFreeMode, SwiperMousewheel]"
             :free-mode="true"
@@ -42,7 +42,7 @@
             </swiper-slide>
           </swiper>
         </div>
-        <div v-else-if="!popularDecks.length" class="empty-state">
+        <div v-else-if="!deckStore.decks.length" class="empty-state">
           No popular sets found.
         </div>
         <div v-else>
@@ -69,7 +69,7 @@
             :observeParents="true"
             class="sets-swiper"
           >
-            <swiper-slide v-for="deck in popularDecks" :key="`popular-${deck.id}`">
+            <swiper-slide v-for="deck in deckStore.decks" :key="`popular-${deck.id}`">
               <div 
                 class="set-card"
                 @click="navigateToDeck(deck.id)"
@@ -86,9 +86,9 @@
                   </div>
                   <div class="set-card__user">
                     <div class="user-avatar-small">
-                      <img :src="deck.user?.avatar || '/avatar.png'" alt="User avatar" />
+                      <img :src="deck.author?.avatarUrl || '/avatar.png'" alt="User" />
                     </div>
-                    <span>{{ deck.user?.userName || 'user2921' }}</span>
+                    <span>{{ deck.author?.userName || 'Unknown' }}</span>
                   </div>
                 </div>
                 <div class="set-card__actions">
@@ -117,51 +117,33 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useDeckStore } from '@/store/deckStore';
 import { FlagIcon, PlayIcon, LightningIcon, ArrowLeftIcon, ArrowRightIcon } from '@/components/icons';
-import { fetchDecks } from '@/services/deckService';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Pagination, Navigation, FreeMode, Mousewheel } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 
-// Swiper
+// Swiper modules
 const SwiperPagination = Pagination;
 const SwiperNavigation = Navigation;
 const SwiperFreeMode = FreeMode;
 const SwiperMousewheel = Mousewheel;
 
-// State variables
+// Router and store
 const router = useRouter();
+const deckStore = useDeckStore();
 
-const popularDecks = ref([]);
-const loadingPopular = ref(false);
-
-const loadPopularDecks = async () => {
-  if (loadingPopular.value) return;
-  
-  loadingPopular.value = true;
-  
-  try {
-    const newDecks = await fetchDecks(); 
-    
-    if (newDecks && newDecks.length > 0) {
-      popularDecks.value = newDecks;
-    }
-  } catch (err) {
-    console.error('Error loading popular decks:', err);
-  } finally {
-    loadingPopular.value = false;
-  }
-};
-
+// Navigation function
 const navigateToDeck = (deckId) => {
   router.push(`/deck/${deckId}`);
 };
 
-onMounted(async () => {
-  loadPopularDecks();
+// Fetch decks on mount
+onMounted(() => {
+  deckStore.fetchDecks();
 });
 </script>
 
@@ -436,16 +418,8 @@ onMounted(async () => {
   }
 }
 
-/* Custom Swiper Navigation Buttons (assuming default swiper navigation is used) */
-/* You might need to override default swiper-button-next/prev styles here */
-/* .swiper-button-next, .swiper-button-prev {
-  color: var(--text-color-light); 
-  top: 50%;
-  transform: translateY(-50%);
-} */
-
 .swiper-button-next:after, .swiper-button-prev:after {
-    font-size: 24px; /* Adjust icon size */
+    font-size: 24px;
 }
 
 .empty-state {
