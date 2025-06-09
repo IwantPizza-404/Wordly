@@ -78,6 +78,7 @@
 
 <script>
 import { useDeckStore } from '@/store/deckStore';
+import { createDeck, createCard } from '@/services/deckService';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -121,11 +122,11 @@ export default {
 
             loading.value = true;
             try {
-                const newDeck = await deckStore.createDeck(deckData.value);
+                const newDeck = await createDeck(deckData.value);
                 
                 // Add cards to the deck
                 for (const card of cards.value) {
-                    await deckStore.addCard(newDeck.id, card);
+                    await createCard(newDeck.id, card);
                 }
 
                 router.push(`/decks/${newDeck.id}`);

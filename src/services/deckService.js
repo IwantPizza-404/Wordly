@@ -11,9 +11,9 @@ export const getRecentDecks = async (limit = 5) => {
   }
 };
 
-export const searchDecks = async (query) => {
+export const searchDecks = async (query, page = 1, limit = 10) => {
   try {
-    const response = await api.get(`/decks/search?query=${query}`);
+    const response = await api.get(`/decks/search?query=${encodeURIComponent(query)}&page=${page}&limit=${limit}`);
     return response.data.data;
   } catch (error) {
     console.error('Error searching decks:', error);
@@ -142,17 +142,58 @@ export const deleteCard = async (deckId, cardId) => {
   }
 };
 
-// Progress Tracking
-export const updateCardProgress = async (deckId, cardId, isCorrect) => {
+// Study Session Operations
+export const startStudySession = async (deckId) => {
   try {
-    const response = await api.post(`/decks/${deckId}/cards/${cardId}/progress`, { isCorrect });
-    return response.data.data;
+    const response = await api.post('/study-sessions/start', { deckId });
+    console.log('Study session started:', response.data);
+    return response.data;
   } catch (error) {
-    console.error('Error updating card progress:', error);
+    console.error('Error starting study session:', error);
     throw error;
   }
 };
 
+export const updateCardStatus = async (sessionId, cardId, isCorrect) => {
+  try {
+    console.log('Updating card status:', { sessionId, cardId, isCorrect });
+    const response = await api.post('/study-sessions/update-card', {
+      sessionId,
+      cardId,
+      isCorrect
+    });
+    console.log('Card status updated:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating card status:', error);
+    throw error;
+  }
+};
+
+export const endStudySession = async (sessionId) => {
+  try {
+    const response = await api.post(`/study-sessions/end/${sessionId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error ending study session:', error);
+    throw error;
+  }
+};
+
+export const getCurrentSession = async (deckId) => {
+  try {
+    const response = await api.get(`/study-sessions/current/${deckId}`);
+    if (!response.data || !response.data.session) {
+      throw new Error('No current session found');
+    }
+    return response.data.session;
+  } catch (error) {
+    console.error('Error getting current session:', error);
+    throw error;
+  }
+};
+
+// Progress Tracking
 export const getDeckProgress = async (deckId) => {
   try {
     const response = await api.get(`/decks/${deckId}/progress`);

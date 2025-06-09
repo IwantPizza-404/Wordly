@@ -73,14 +73,14 @@ const handleRegister = async () => {
 
   try {
     const response = await registerUser({
-      full_name: fullName.value,
-      username: username.value,
+      fullName: fullName.value,
+      userName: username.value,
       email: email.value,
       password: password.value,
     });
 
     if (response) {
-      await authStore.login(username.value, password.value);
+      await authStore.login(email.value, password.value);
       router.push('/');
     }
   } catch (error) {
